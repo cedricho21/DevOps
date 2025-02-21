@@ -1,0 +1,33 @@
+---
+- name: Install PostgreSQL
+  become: true
+  apt:
+    name: postgresql
+    state: present
+    update_cache: yes
+
+- name: Start and enable PostgreSQL service
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Create a database and table with sample data
+  become: yes
+  become_user: postgres
+  block:
+    - name: Create database
+      postgresql_db:
+        name: my_database
+
+    - name: Create table and insert data
+      postgresql_query:
+        db: my_database
+        query: |
+          CREATE TABLE IF NOT EXISTS sample_table (
+            id SERIAL PRIMARY KEY,
+            data TEXT NOT NULL
+          );
+          
+          INSERT INTO sample_table (data) VALUES ('Sample Data 1'), ('Sample Data 2'), ('Sample Data 3')
+          ON CONFLICT DO NOTHING;

@@ -1,0 +1,58 @@
+gitlab-runner-566d876d5b-5xnbt:/# cat /etc/gitlab-runner/config.toml
+concurrent = 10
+check_interval = 3
+log_level = "info"
+connection_max_age = "15m0s"
+shutdown_timeout = 0
+
+[session_server]
+  session_timeout = 1800
+
+[[runners]]
+  name = "gitlab-runner-566d876d5b-5xnbt"
+  url = "https://repos.21-school.ru"
+  id = 15414
+  token = "hbLYLnijXwsUwB9g-aBy"
+  token_obtained_at = 2025-02-06T12:57:11Z
+  token_expires_at = 0001-01-01T00:00:00Z
+  executor = "kubernetes"
+  [runners.custom_build_dir]
+  [runners.cache]
+    MaxUploadedArchiveSize = 0
+    [runners.cache.s3]
+    [runners.cache.gcs]
+    [runners.cache.azure]
+  [runners.kubernetes]
+    host = ""
+    bearer_token_overwrite_allowed = false
+    image = "docker:stable"
+    namespace = "gitlab"
+    namespace_overwrite_allowed = ""
+    namespace_per_job = false
+    privileged = true
+    node_selector_overwrite_allowed = ""
+    node_tolerations_overwrite_allowed = ""
+    pod_labels_overwrite_allowed = ""
+    service_account_overwrite_allowed = ""
+    pod_annotations_overwrite_allowed = ""
+    [runners.kubernetes.init_permissions_container_security_context]
+      [runners.kubernetes.init_permissions_container_security_context.capabilities]
+    [runners.kubernetes.build_container_security_context]
+      [runners.kubernetes.build_container_security_context.capabilities]
+    [runners.kubernetes.helper_container_security_context]
+      [runners.kubernetes.helper_container_security_context.capabilities]
+    [runners.kubernetes.service_container_security_context]
+      [runners.kubernetes.service_container_security_context.capabilities]
+    [runners.kubernetes.resources]
+      limits = { cpu = "2000m", memory = "1024Mi" }
+      requests = { cpu = "1000m", memory = "512Mi" }
+    [runners.kubernetes.volumes]
+
+      [[runners.kubernetes.volumes.host_path]]
+        name = "docker-sock"
+        mount_path = "/var/run/docker.sock"
+
+      [[runners.kubernetes.volumes.secret]]
+        name = "private-key"
+        mount_path = "/secrets/privateKey"
+    [runners.kubernetes.dns_config]

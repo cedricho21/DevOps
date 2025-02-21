@@ -1,0 +1,7 @@
+resources:
+- ../../base
+- secret.yaml
+- configMap.yaml
+
+patchesStrategicMerge:
+- replicas-patch.yaml

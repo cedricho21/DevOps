@@ -1,0 +1,43 @@
+stages:
+  - build
+  - test
+  - staging
+
+build:
+  stage: build
+  before_script:
+    - apk add --no-cache curl
+    - curl -L "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    - chmod +x /usr/local/bin/docker-compose
+    - docker-compose --version
+  script:
+    - cd src/
+    - sh build.sh
+    - docker-compose down -v
+    - export PRIVATE_KEY=$(cat /secrets/privateKey/privateKey)
+    - docker-compose up -d
+  only:
+    - /^feature_.*$/
+
+test:
+  stage: test
+  image: node:latest
+  script:
+    - cd src/
+    - npm install -g newman
+    - newman run application_tests.postman_collection.json
+  only:
+    - /^feature_.*$/
+
+staging:
+  stage: staging
+  image: rancher/k3s:v1.21.4-k3s1
+  script:
+    - echo "$KUBECONFIG" > kubeconfig.yaml
+    - kubectl apply -f src/app/deployment.yaml -n default
+    - kubectl apply -f src/app/service.yaml -n default
+    - kubectl apply -f src/app/secret.yaml -n default
+    - kubectl apply -f src/app/configMap.yaml -n default
+  only:
+    - tags
+  when: manual

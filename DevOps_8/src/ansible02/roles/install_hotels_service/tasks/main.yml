@@ -1,0 +1,40 @@
+---
+- name: Copy service code
+  become: true
+  copy:
+    src: /vagrant/src/services/hotel-service
+    dest: /home/hotel-service
+
+- name: Install openjdk
+  become: true
+  apt:
+    name: openjdk-8-jdk
+    state: present
+    update_cache: yes
+
+- name: Build the project using Maven
+  become: yes
+  command: bash /home/hotel-service/hotel-service/mvnw clean package -DskipTests
+  args:
+    chdir: /home/hotel-service/hotel-service
+
+- name: Create env
+  become: true 
+  lineinfile:
+    path: /etc/environment 
+    line: "{{ item }}"
+  loop:
+    - POSTGRES_HOST="127.0.0.1"
+    - POSTGRES_PORT="5432"
+    - POSTGRES_DB="hotels_db"
+    - POSTGRES_USER="postgres"
+    - POSTGRES_PASSWORD="123321"
+
+- name: Reload environment variables
+  shell: source /etc/environment
+  args:
+    executable: /bin/bash
+
+- name: Start api
+  become: true
+  shell: nohup java -jar /home/hotel-service/hotel-service/target/hotel-service-0.0.1-SNAPSHOT.jar &

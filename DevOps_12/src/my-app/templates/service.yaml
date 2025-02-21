@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.postgres.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.postgres.port }}
+      targetPort: {{ .Values.services.postgres.port }}
+  selector:
+    app: postgres
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.rabbitmq.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.rabbitmq.port }}
+      targetPort: {{ .Values.services.rabbitmq.port }}
+  selector:
+    app: rabbitmq
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.session.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.session.port }}
+      targetPort: {{ .Values.services.session.port }}
+  selector:
+    app: session
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.hotel.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.hotel.port }}
+      targetPort: {{ .Values.services.hotel.port }}
+  selector:
+    app: hotel
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.booking.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.booking.port }}
+      targetPort: {{ .Values.services.booking.port }}
+  selector:
+    app: booking
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.payment.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.payment.port }}
+      targetPort: {{ .Values.services.payment.port }}
+  selector:
+    app: payment
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.loyalty.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.loyalty.port }}
+      targetPort: {{ .Values.services.loyalty.port }}
+  selector:
+    app: loyalty
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.report.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.report.port }}
+      targetPort: {{ .Values.services.report.port }}
+  selector:
+    app: report
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.gateway.name }}
+spec:
+  ports:
+    - port: {{ .Values.services.gateway.port }}
+      targetPort: {{ .Values.services.gateway.port }}
+  selector:
+    app: gateway
+
+---

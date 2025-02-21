@@ -1,0 +1,96 @@
+---
+- name: Install Consul
+  become: yes
+  apt:
+    name:
+      - consul
+      - software-properties-common
+      - curl
+      - ca-certificates
+      - apt-transport-https
+      - gnupg2
+      - unzip
+    state: present
+    update_cache: yes
+
+- name: Update Consul
+  become: true
+  unarchive:
+    src: /vagrant/consul_1.20.0_linux_amd64.zip
+    dest: /usr/bin
+
+- name: Copy consul_client.hcl
+  become: true
+  copy:
+    src: /vagrant/src/consul01/consul_client_api.hcl
+    dest: /etc/consul.d/consul_client_api.hcl
+  when: inventory_hostname == "api"
+
+- name: Copy consul_client.hcl
+  become: true
+  copy:
+    src: /vagrant/src/consul01/consul_client_db.hcl
+    dest: /etc/consul.d/consul_client_db.hcl
+  when: inventory_hostname == "db"
+
+- name: Enable Consul
+  become: true
+  systemd_service:
+    name: consul
+    state: started
+    enabled: yes
+
+- name: Create dir
+  become: true
+  file:
+    path: /etc/apt/keyrings/
+    state: directory
+ 
+- name: Download and add the Envoy signing key
+  become: true
+  get_url:
+    url: https://apt.envoyproxy.io/signing.key
+    dest: /tmp/envoy-signing.key
+
+- name: Convert the signing key to GPG format
+  become: true
+  command: gpg --dearmor -o /etc/apt/keyrings/envoy-keyring.gpg /tmp/envoy-signing.key
+
+- name: Add Envoy repository
+  become: true
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/envoy-keyring.gpg] https://apt.envoyproxy.io jammy main"
+    state: present
+
+- name: Install Envoy
+  become: true
+  apt:
+    name: envoy=1.30.0
+    state: present
+    update_cache: yes
+
+- name: Create systemd service file for Consul Connect Proxy
+  become: true
+  template:
+    src: /vagrant/src/consul01/consul-connect-proxy.service.j2
+    dest: /etc/systemd/system/consul-connect-{{ inventory_hostname }}.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Reload systemd to pick up new service file
+  become: true
+  systemd:
+    daemon_reload: yes
+
+- name: Ensure Consul Connect Proxy service is started and enabled on boot
+  become: true
+  systemd:
+    name: consul-connect-{{ inventory_hostname }}.service
+    state: started
+    enabled: yes
+
+- name: Create consul intention
+  command: consul intention check api db
+  when: inventory_hostname == "api"
+

@@ -1,0 +1,12 @@
+[Unit]
+Description=Consul Connect Proxy for {{ inventory_hostname }}
+After=network.target
+
+[Service]
+ExecStart=consul connect proxy -sidecar-for {{ inventory_hostname }}
+Restart=always
+RestartSec=5
+User=consul
+
+[Install]
+WantedBy=multi-user.target

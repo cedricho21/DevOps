@@ -1,0 +1,210 @@
+version: '2.2'
+
+services:
+  db_session:
+    image: postgres:13
+    container_name: session-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: users_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - session-db-data:/var/lib/postgresql/data
+
+  db_hotel:
+    image: postgres:13
+    container_name: hotel-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: hotels_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - hotel-db-data:/var/lib/postgresql/data
+
+  db_booking:
+    image: postgres:13
+    container_name: booking-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: reservations_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - booking-db-data:/var/lib/postgresql/data
+
+  db_payment:
+    image: postgres:13
+    container_name: payment-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: payments_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+
+  db_loyalty:
+    image: postgres:13
+    container_name: loyalty-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: balances_db
+    ports:
+      - "5437:5432"
+    volumes:
+      - loyalty-db-data:/var/lib/postgresql/data
+
+  db_report:
+    image: postgres:13
+    container_name: report-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: statistics_db
+    ports:
+      - "5438:5432"
+    volumes:
+      - report-db-data:/var/lib/postgresql/data
+
+  session:
+    image: beyonder112/devops_7:session
+    container_name: session-service
+    depends_on:
+      - db_session
+    ports:
+      - "8081:8081"
+    environment:
+      POSTGRES_HOST: db_session
+      POSTGRES_PORT: 5432
+      POSTGRES_USER : postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: users_db
+
+  hotel:
+    image: beyonder112/devops_7:hotel
+    container_name: hotel-service
+    depends_on:
+      - db_hotel
+    environment:
+      POSTGRES_HOST: db_hotel
+      POSTGRES_PORT: 5432
+      POSTGRES_USER : postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: hotels_db
+
+  booking:
+    image: beyonder112/devops_7:booking
+    container_name: booking-service
+    depends_on:
+      - db_booking
+    environment:
+      POSTGRES_HOST: db_booking
+      POSTGRES_PORT: 5432
+      POSTGRES_USER : postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: reservations_db
+      RABBIT_MQ_HOST: rabbitmq
+      RABBIT_MQ_PORT: 5672
+      RABBIT_MQ_USER: guest
+      RABBIT_MQ_PASSWORD: guest
+      RABBIT_MQ_QUEUE_NAME: messagequeue
+      RABBIT_MQ_EXCHANGE: messagequeue-exchange
+      HOTEL_SERVICE_HOST: hotel-service
+      HOTEL_SERVICE_PORT: 8082
+      PAYMENT_SERVICE_HOST: payment-service
+      PAYMENT_SERVICE_PORT: 8084
+      LOYALTY_SERVICE_HOST: loyalty-service
+      LOYALTY_SERVICE_PORT: 8085
+
+  loyalty:
+    image: beyonder112/devops_7:loyalty
+    container_name: loyalty-service
+    depends_on:
+      - db_loyalty
+    environment:
+      POSTGRES_HOST: db_loyalty
+      POSTGRES_PORT: 5432
+      POSTGRES_USER : postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: balances_db
+
+  report:
+    image: beyonder112/devops_7:report
+    container_name: report-service
+    depends_on:
+      - db_report
+    environment:
+      POSTGRES_HOST: db_report
+      POSTGRES_PORT: 5432
+      POSTGRES_USER : postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: statistics_db
+      RABBIT_MQ_HOST: rabbitmq
+      RABBIT_MQ_PORT: 5672
+      RABBIT_MQ_USER: guest
+      RABBIT_MQ_PASSWORD: guest
+      RABBIT_MQ_QUEUE_NAME: messagequeue
+      RABBIT_MQ_EXCHANGE: messagequeue-exchange
+
+  payment:
+    image: beyonder112/devops_7:payment
+    container_name: payment-service
+    depends_on:
+      - db_payment
+    environment:
+      POSTGRES_HOST: db_payment
+      POSTGRES_PORT: 5432
+      POSTGRES_USER : postgres
+      POSTGRES_PASSWORD: 123321
+      POSTGRES_DB: payments_db
+
+  gateway:
+    image: beyonder112/devops_7:gateway
+    container_name: gateway-service
+    ports:
+      - "8087:8087"
+    depends_on:
+      - session
+      - hotel
+      - booking
+      - payment
+      - loyalty
+      - report
+    environment:
+      SESSION_SERVICE_HOST: session-service
+      SESSION_SERVICE_PORT: 8081
+      HOTEL_SERVICE_HOST: hotel-service
+      HOTEL_SERVICE_PORT: 8082
+      BOOKING_SERVICE_HOST: booking-service
+      BOOKING_SERVICE_PORT: 8083
+      PAYMENT_SERVICE_HOST: payment-service
+      PAYMENT_SERVICE_PORT: 8084
+      LOYALTY_SERVICE_HOST: loyalty-service
+      LOYALTY_SERVICE_PORT: 8085
+      REPORT_SERVICE_HOST: report-service
+      REPORT_SERVICE_PORT: 8086
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  session-db-data:
+  hotel-db-data:
+  booking-db-data:
+  payment-db-data:
+  loyalty-db-data:
+  report-db-data:
+
+
+

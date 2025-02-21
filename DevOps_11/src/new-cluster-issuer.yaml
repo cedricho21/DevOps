@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: selfsigned-cert
+spec:
+  secretName: selfsigned-cert-secret
+  issuerRef:
+    kind: ClusterIssuer
+    name: selfsigned-issuer
+  commonName: devops-11.local
+  dnsNames:
+    - "devops-11.local"
+    - "devops-11.local"
+

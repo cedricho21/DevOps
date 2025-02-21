@@ -1,0 +1,15 @@
+---
+- name: Install PostgreSQL
+  become: true
+  apt:
+    name: postgresql
+    state: present
+    update_cache: yes
+
+- name: Create database
+  become: true
+  postgresql_db:
+    name: hotels_db
+    state: present
+    login_user: postgres
+    login_password: 123321

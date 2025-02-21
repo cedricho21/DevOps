@@ -1,0 +1,72 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+
+  config.vm.define "manager01" do |manager|
+    manager.vm.hostname = "manager01"
+    manager.vm.network "private_network", ip: "192.168.56.10"
+
+    manager.vm.network "forwarded_port", guest: 80, host: 8087
+    manager.vm.network "forwarded_port", guest: 81, host: 8081
+    manager.vm.network "forwarded_port", guest: 9000, host: 9000
+
+    
+    manager.vm.provider "virtualbox" do |vb|
+      vb.memory = "3072"  
+      vb.cpus = 1         
+    end
+    
+    manager.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+      add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+      apt-get update
+      apt-get install -y docker-ce
+      docker swarm init --advertise-addr 192.168.56.10
+      docker swarm join-token -q worker > /vagrant/worker_join_token.txt
+    SHELL
+  end
+
+  config.vm.define "worker01" do |worker1|
+    worker1.vm.hostname = "worker01"
+    worker1.vm.network "private_network", ip: "192.168.56.11"
+    
+    worker1.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"  
+      vb.cpus = 1         
+    end
+    
+    worker1.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y iproute2
+      apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+      add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+      apt-get update
+      apt-get install -y docker-ce
+      TOKEN=$(cat /vagrant/worker_join_token.txt)
+      docker swarm join --token $TOKEN 192.168.56.10:2377
+    SHELL
+  end
+
+  config.vm.define "worker02" do |worker2|
+    worker2.vm.hostname = "worker02"
+    worker2.vm.network "private_network", ip: "192.168.56.12"
+    
+    worker2.vm.provider "virtualbox" do |vb|
+      vb.memory = "1024"
+      vb.cpus = 1         
+    end
+    
+    worker2.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+      add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+      apt-get update
+      apt-get install -y docker-ce
+      TOKEN=$(cat /vagrant/worker_join_token.txt)
+      docker swarm join --token $TOKEN 192.168.56.10:2377
+    SHELL
+  end
+end

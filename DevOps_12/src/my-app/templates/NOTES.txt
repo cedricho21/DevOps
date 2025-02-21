@@ -1,0 +1,6 @@
+{{- if .Values.ingress.enabled }}
+Ingress is enabled.
+{{- else }}
+Ingress is disabled.
+{{- end }}
+

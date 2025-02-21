@@ -1,0 +1,29 @@
+groups:
+  - name: critical-alerts
+    rules:
+      - alert: LowMemory
+        expr: node_memory_MemAvailable_bytes < 100 * 1024 * 1024
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Доступная память меньше 100 МБ"
+          description: "На узле {{ $labels.instance }} доступная память меньше 100 МБ."
+
+      - alert: HighRAMUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) > 1 * 1024 * 1024 * 1024
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Затраченная RAM больше 1 ГБ"
+          description: "На узле {{ $labels.instance }} затраченная RAM больше 1 ГБ."
+
+      - alert: HighCPUUsage
+        expr: (rate(node_cpu_seconds_total[5m]) * 100) > 10
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Использование CPU превышает 10%"
+          description: "На узле {{ $labels.instance }} использование CPU превышает 10%."

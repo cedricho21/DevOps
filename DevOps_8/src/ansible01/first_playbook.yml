@@ -1,0 +1,44 @@
+---
+- name: Deploy Docker application
+  hosts: nodes
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install docker
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+
+    - name: Install PostreSQL
+      apt:
+        name:
+          - postgresql
+        state: present
+
+    - name: Create Database
+      command: psql -U postgres -f init.sql
+      args:
+        chdir: /vagrant/src/services/database
+      environment:
+        PGPASSWORD: 123321
+
+
+    - name: Copy docker-compose file from manager to node
+      copy:
+        src: /vagrant/src/docker-compose.yml
+        dest: /home/docker-compose.yml
+    - name: Login to Docker Hub
+      docker_login:
+        username: beyonder112
+        password: 123321mmM
+        email: kaigorodovm3@gmail.com
+
+    - name: Deploy application using docker-compose
+      command: docker-compose up -d
+      args:
+        chdir: /home

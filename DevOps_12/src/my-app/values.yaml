@@ -1,0 +1,77 @@
+# values.yaml
+
+replicaCount: 1
+replicaGatewayCount: 3
+
+image:
+  postgres:
+    repository: postgres
+    tag: latest
+  rabbitmq:
+    repository: rabbitmq
+    tag: management
+  session:
+    repository: beyonder112/devops_7
+    tag: session
+  hotel:
+    repository: beyonder112/devops_7
+    tag: hotel
+  booking:
+    repository: beyonder112/devops_7
+    tag: booking
+  payment:
+    repository: beyonder112/devops_7
+    tag: payment
+  loyalty:
+    repository: beyonder112/devops_7
+    tag: loyalty
+  report:
+    repository: beyonder112/devops_7
+    tag: report
+  gateway:
+    repository: beyonder112/devops_7
+    tag: gateway
+
+services:
+  postgres:
+    name: postgres-service
+    port: 5432
+  rabbitmq:
+    name: rabbitmq-service
+    port: 5672
+  session:
+    name: session-service
+    port: 8081
+  hotel:
+    name: hotel-service
+    port: 8082
+  booking:
+    name: booking-service
+    port: 8083
+  payment:
+    name: payment-service
+    port: 8084
+  loyalty:
+    name: loyalty-service
+    port: 8085
+  report:
+    name: report-service
+    port: 8086
+  gateway:
+    name: gateway-service
+    port: 8087
+
+configMap:
+  name: app-config
+
+secret:
+  name: db-secrets 
+  data:
+    POSTGRES_USER: "postgres"     
+    POSTGRES_PASSWORD: "postgres"      
+    RABBIT_MQ_USER: "guest"            
+    RABBIT_MQ_PASSWORD: "guest"
+
+ingress:
+  enabled: false
+

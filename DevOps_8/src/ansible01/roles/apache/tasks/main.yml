@@ -1,0 +1,7 @@
+---
+- name: Install Apache web server
+  become: true
+  apt:
+    name: apache2
+    state: present
+    update_cache: yes

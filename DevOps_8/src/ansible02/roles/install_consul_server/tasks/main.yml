@@ -1,0 +1,29 @@
+---
+- name: Install Consul
+  become: true
+  apt:
+    name: 
+      - consul
+      - unzip
+    state: present
+    update_cache: yes
+
+- name: Update Consul
+  become: true
+  unarchive:
+    src: /vagrant/consul_1.20.0_linux_amd64.zip
+    dest: /usr/bin
+
+- name: Copy consul_server.hcl
+  become: true
+  copy:
+    src: /vagrant/src/consul01/consul_server.hcl
+    dest: /etc/consul.d/consul_server.hcl      
+
+- name: Enable Consul
+  become: true
+  systemd_service:
+    name: consul
+    state: started
+    enabled: yes
+
